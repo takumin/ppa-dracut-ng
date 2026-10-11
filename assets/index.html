@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Personal Package Archive for dracut-ng</title>
+  </head>
+  <body>
+    <h1>Personal Package Archive for dracut-ng</h1>
+    <p>dracut-ng is an event driven initramfs infrastructure, and the actively maintained successor of dracut.</p>
+    <p>The official Apt repositories of Debian stable and Ubuntu LTS ship older versions of dracut.</p>
+    <p>This PPA repository rebuilds the latest dracut package maintained by the Debian Kernel Team for each supported platform.</p>
+    <h2>Supported platforms</h2>
+    <ul>
+      <li>Debian 12 (bookworm)</li>
+      <li>Debian 13 (trixie)</li>
+      <li>Ubuntu 24.04 LTS (noble)</li>
+      <li>Ubuntu 26.04 LTS (resolute)</li>
+    </ul>
+    <h2>Supported architectures</h2>
+    <ul>
+      <li>amd64</li>
+      <li>arm64</li>
+    </ul>
+    <h2>Install required packages</h2>
+    <pre><code>sudo apt-get update</code></pre>
+    <pre><code>sudo apt-get install wget ca-certificates</code></pre>
+    <h2>Download GPG public key</h2>
+    <pre><code>sudo mkdir -p -m 0755 /etc/apt/keyrings</code></pre>
+    <pre><code>sudo wget -O /etc/apt/keyrings/ppa-dracut-ng.asc https://takumi.tmfam.com/ppa-dracut-ng/public.gpg.asc</code></pre>
+    <h2>Configure APT sources</h2>
+    <pre><code>cat &lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/ppa-dracut-ng.sources
+Types: deb deb-src
+URIs: https://takumi.tmfam.com/ppa-dracut-ng
+Suites: $(. /etc/os-release &amp;&amp; echo "${VERSION_CODENAME}")
+Components: main
+Signed-By: /etc/apt/keyrings/ppa-dracut-ng.asc
+EOF</code></pre>
+    <h2>Install dracut package</h2>
+    <p>Note: Installing the dracut package removes initramfs-tools.</p>
+    <pre><code>sudo apt-get update</code></pre>
+    <pre><code>sudo apt-get install dracut</code></pre>
+    <h2>References</h2>
+    <dl>
+      <dt>Upstream Repository</dt>
+      <dd><a href="https://github.com/dracut-ng/dracut-ng">https://github.com/dracut-ng/dracut-ng</a></dd>
+      <dt>Debian Kernel Team Repository</dt>
+      <dd><a href="https://salsa.debian.org/kernel-team/dracut">https://salsa.debian.org/kernel-team/dracut</a></dd>
+      <dt>Personal Package Archive Repository</dt>
+      <dd><a href="https://github.com/takumin/ppa-dracut-ng">https://github.com/takumin/ppa-dracut-ng</a></dd>
+    </dl>
+  </body>
+</html>

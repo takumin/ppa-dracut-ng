@@ -1,0 +1,12 @@
+Dir {
+  ArchiveDir ".";
+  CacheDir "../build";
+};
+TreeDefault {
+  Directory "pool/@CODENAME@/$(SECTION)";
+  SrcDirectory "pool/@CODENAME@/$(SECTION)";
+};
+Tree "dists/@CODENAME@" {
+  Sections "main";
+  Architectures "@ARCHITECTURES@ all source";
+}

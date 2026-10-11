@@ -1,0 +1,91 @@
+name: Deploy
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        dist: [bookworm, trixie, noble, resolute]
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            build_type: full
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            build_type: any
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Build package
+        run: make package-${{ matrix.dist }} BUILD_TYPE=${{ matrix.build_type }}
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ matrix.dist }}-${{ matrix.arch }}
+          path: |
+            build/${{ matrix.dist }}/*.deb
+            build/${{ matrix.dist }}/*.dsc
+            build/${{ matrix.dist }}/*.tar.*
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y apt-utils gnupg
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: build-*
+          path: artifacts
+      - name: Collect packages
+        run: |
+          for dir in artifacts/build-*; do
+            name="$(basename "${dir}")"
+            dist="${name#build-}"
+            dist="${dist%-*}"
+            mkdir -p "build/${dist}"
+            cp -a "${dir}"/* "build/${dist}/"
+          done
+      - name: Setup secrets
+        run: mkdir -m 0700 secret
+      - name: Import GPG passphrase
+        run: echo -n "${{ secrets.GPG_PASSPHRASE }}" | base64 -d > secret/passphrase
+      - name: Import GPG signing key
+        run: echo -n "${{ secrets.GPG_SIGNING_KEY }}" > secret/secret.gpg.asc
+      - name: Build repository
+        run: make assets
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: 'public'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
