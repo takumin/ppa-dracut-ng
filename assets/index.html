@@ -27,6 +27,16 @@
     <h2>Download GPG public key</h2>
     <pre><code>sudo mkdir -p -m 0755 /etc/apt/keyrings</code></pre>
     <pre><code>sudo wget -O /etc/apt/keyrings/ppa-dracut-ng.asc https://takumi.tmfam.com/ppa-dracut-ng/public.gpg.asc</code></pre>
+    <h2>Verify GPG public key</h2>
+    <pre><code>gpg --show-keys /etc/apt/keyrings/ppa-dracut-ng.asc</code></pre>
+    <dl>
+      <dt>pub</dt>
+      <dd><code>@GPG_PUB@</code></dd>
+      <dt>fpr</dt>
+      <dd><code>@GPG_FPR@</code></dd>
+      <dt>uid</dt>
+      <dd><code>@GPG_UID@</code></dd>
+    </dl>
     <h2>Configure APT sources</h2>
     <pre><code>cat &lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/ppa-dracut-ng.sources
 Types: deb deb-src

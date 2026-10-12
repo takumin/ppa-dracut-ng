@@ -33,6 +33,7 @@ The other tools ([just](https://just.systems/) as the task runner, [curl](https:
 $ aqua install
 ```
 
+Generating the web assets (`just webpage`) additionally requires `gnupg`, which reads the details of the GPG public key embedded in `index.html`.
 Generating a new GPG signing key (`just generate-gpg`) additionally requires `gnupg` and `pwgen`.
 
 # Usage

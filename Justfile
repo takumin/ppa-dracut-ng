@@ -129,8 +129,30 @@ _publish sign *targets:
     done
 
 # Generate and sign the apt repository with the web assets
-assets: reposign
-    cp assets/index.html public/index.html
+assets: reposign webpage
+
+# Generate the web assets into public/
+webpage:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p public
+    # Embed the details of the signing key, so that index.html follows key updates.
+    export LC_ALL=C GNUPGHOME="{{ justfile_directory() }}/build/gnupg"
+    mkdir -p -m 0700 "${GNUPGHOME}"
+    showkeys() { gpg --batch --quiet --show-keys "$@" assets/public.gpg.asc; }
+    escape() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'; }
+    pub="$(showkeys | awk '$1 == "pub" { sub(/^pub +/, ""); print; exit }' | escape)"
+    fpr="$(showkeys --with-colons | awk -F: '$1 == "pub" { p = 1 } p && $1 == "fpr" { print $10; exit }')"
+    uid="$(showkeys --with-colons | awk -F: '$1 == "uid" { print $10 }' | escape | awk 'NR > 1 { printf "<br/>" } { printf "%s", $0 }')"
+    if [ -z "${pub}" ] || [ -z "${fpr}" ] || [ -z "${uid}" ]; then
+        echo "failed to read the GPG public key: assets/public.gpg.asc" >&2
+        exit 1
+    fi
+    html="$(cat assets/index.html)"
+    html="${html//@GPG_PUB@/"${pub}"}"
+    html="${html//@GPG_FPR@/"${fpr}"}"
+    html="${html//@GPG_UID@/"${uid}"}"
+    printf '%s\n' "${html}" > public/index.html
     cp assets/public.gpg.asc public/public.gpg.asc
 
 # Generate a new GPG signing key (requires gnupg and pwgen)
