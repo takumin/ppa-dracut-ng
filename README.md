@@ -45,6 +45,13 @@ $ just                   # build, generate and sign the apt repository
 $ just --list            # list all recipes
 ```
 
+The URLs embedded in the web assets and the `Origin` field of the apt repository are taken from `SITE_URL` (the public URL of the apt repository) and `REPOSITORY_URL` (the URL of this source repository).
+On GitHub Actions, they are derived from the GitHub Pages settings and the repository being built.
+
+```console
+$ SITE_URL=https://example.github.io/ppa-dracut-ng REPOSITORY_URL=https://github.com/example/ppa-dracut-ng just
+```
+
 Update `SOURCE_VERSION` and `SOURCE_SHA256` (the SHA-256 of the `.dsc` file) in `Justfile` to follow a new Debian release.
 
 # Reference

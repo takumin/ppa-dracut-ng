@@ -84,10 +84,14 @@ jobs:
         run: echo -n "${{ secrets.GPG_PASSPHRASE }}" | base64 -d > secret/passphrase
       - name: Import GPG signing key
         run: echo -n "${{ secrets.GPG_SIGNING_KEY }}" > secret/secret.gpg.asc
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v6
       - name: Build repository
         run: just assets
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
+        env:
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

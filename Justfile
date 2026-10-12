@@ -19,7 +19,12 @@ architectures := "amd64 arm64"
 
 dists := "bookworm trixie noble resolute"
 
-aptly_origin := "takumi.tmfam.com"
+# Public URL of the apt repository, and URL of this source repository (overridden by CI)
+site_url := trim_end_match(env("SITE_URL", "https://takumi.tmfam.com/ppa-dracut-ng"), "/")
+repository_url := env("REPOSITORY_URL", "https://github.com/takumin/ppa-dracut-ng")
+
+# The Origin field of the Release file is the host name of the site URL.
+aptly_origin := replace_regex(site_url, '^[a-z]+://([^/:]+).*$', '$1')
 aptly_label := "Personal Package Archive for dracut-ng"
 
 # Build, generate and sign the apt repository
@@ -149,6 +154,8 @@ webpage:
         exit 1
     fi
     html="$(cat assets/index.html)"
+    html="${html//@SITE_URL@/"$(printf '%s' "{{ site_url }}" | escape)"}"
+    html="${html//@REPOSITORY_URL@/"$(printf '%s' "{{ repository_url }}" | escape)"}"
     html="${html//@GPG_PUB@/"${pub}"}"
     html="${html//@GPG_FPR@/"${fpr}"}"
     html="${html//@GPG_UID@/"${uid}"}"
