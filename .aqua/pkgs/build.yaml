@@ -1,4 +1,6 @@
 ---
 packages:
+- name: casey/just@1.58.0
+  tags: [build, repository]
 - name: stunnel/static-curl@8.22.0
   tags: [build]

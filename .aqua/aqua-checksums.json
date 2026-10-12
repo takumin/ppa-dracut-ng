@@ -1,6 +1,16 @@
 {
   "checksums": [
     {
+      "id": "github_release/github.com/casey/just/1.58.0/just-1.58.0-aarch64-unknown-linux-musl.tar.gz",
+      "checksum": "748237128C4C40CBDABC65E841D05CEBA13CC23A91EABA395495894C1D9764DF",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/casey/just/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz",
+      "checksum": "4A5CC2F53E6F0F8C59092A6CC38291EB729D46A7DD95D3AE582008881B84931D",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/stunnel/static-curl/8.22.0/curl-linux-aarch64-dev-8.22.0.tar.xz",
       "checksum": "73958BD2CB2116E7F4860100826424D44D4961A4FE81C20A50304744617D5DC9",
       "algorithm": "sha256"

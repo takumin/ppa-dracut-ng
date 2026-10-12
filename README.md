@@ -24,10 +24,10 @@ The following adjustments are applied automatically at build time (see `assets/b
 
 # Required
 ```console
-$ sudo apt install make docker.io apt-utils gnupg pwgen
+$ sudo apt install docker.io apt-utils gnupg pwgen
 ```
 
-The other tools ([curl](https://github.com/stunnel/static-curl) for downloading the source package) are managed by [aqua](https://aquaproj.github.io/).
+The other tools ([just](https://just.systems/) as the task runner and [curl](https://github.com/stunnel/static-curl) for downloading the source package) are managed by [aqua](https://aquaproj.github.io/).
 
 ```console
 $ aqua install
@@ -35,13 +35,14 @@ $ aqua install
 
 # Usage
 ```console
-$ make package           # build packages for all platforms
-$ make package-trixie    # build packages for a single platform
-$ make repository        # generate an unsigned apt repository into public/
-$ make                   # build, generate and sign the apt repository
+$ just package           # build packages for all platforms
+$ just package trixie    # build packages for a single platform
+$ just repository        # generate an unsigned apt repository into public/
+$ just                   # build, generate and sign the apt repository
+$ just --list            # list all recipes
 ```
 
-Update `SOURCE_VERSION` and `SOURCE_SHA256` (the SHA-256 of the `.dsc` file) in `Makefile` to follow a new Debian release.
+Update `SOURCE_VERSION` and `SOURCE_SHA256` (the SHA-256 of the `.dsc` file) in `Justfile` to follow a new Debian release.
 
 # Reference
 - Upstream Repository
