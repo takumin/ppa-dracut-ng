@@ -27,6 +27,12 @@ The following adjustments are applied automatically at build time (see `assets/b
 $ sudo apt install make docker.io apt-utils gnupg pwgen
 ```
 
+The other tools ([curl](https://github.com/stunnel/static-curl) for downloading the source package) are managed by [aqua](https://aquaproj.github.io/).
+
+```console
+$ aqua install
+```
+
 # Usage
 ```console
 $ make package           # build packages for all platforms

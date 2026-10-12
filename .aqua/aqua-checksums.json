@@ -1,0 +1,19 @@
+{
+  "checksums": [
+    {
+      "id": "github_release/github.com/stunnel/static-curl/8.22.0/curl-linux-aarch64-dev-8.22.0.tar.xz",
+      "checksum": "73958BD2CB2116E7F4860100826424D44D4961A4FE81C20A50304744617D5DC9",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/stunnel/static-curl/8.22.0/curl-linux-x86_64-dev-8.22.0.tar.xz",
+      "checksum": "93A928C9BAB36604FF646E7DE31C9D4B789145ACF8C7CDA75E7DA2E1221C5CC7",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.574.1/registry.yaml",
+      "checksum": "B4F0E425BC813721E1BD4CD7DECA9FDEA64BE0AFD759F529E3122AE5E1B584F3",
+      "algorithm": "sha256"
+    }
+  ]
+}

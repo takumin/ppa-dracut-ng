@@ -1,0 +1,4 @@
+---
+packages:
+- name: stunnel/static-curl@8.22.0
+  tags: [build]

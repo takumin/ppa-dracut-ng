@@ -1,0 +1,14 @@
+---
+# aqua - Declarative CLI Version Manager
+# https://aquaproj.github.io/
+checksum:
+  enabled: true
+  require_checksum: true
+  supported_envs:
+  - linux/amd64
+  - linux/arm64
+registries:
+- type: standard
+  ref: v4.574.1 # renovate: depName=aquaproj/aqua-registry
+packages:
+- import: pkgs/*.yaml
