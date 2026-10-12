@@ -24,14 +24,16 @@ The following adjustments are applied automatically at build time (see `assets/b
 
 # Required
 ```console
-$ sudo apt install docker.io apt-utils gnupg pwgen
+$ sudo apt install docker.io
 ```
 
-The other tools ([just](https://just.systems/) as the task runner and [curl](https://github.com/stunnel/static-curl) for downloading the source package) are managed by [aqua](https://aquaproj.github.io/).
+The other tools ([just](https://just.systems/) as the task runner, [curl](https://github.com/stunnel/static-curl) for downloading the source package and [aptly](https://www.aptly.info/) for generating the apt repository) are managed by [aqua](https://aquaproj.github.io/).
 
 ```console
 $ aqua install
 ```
+
+Generating a new GPG signing key (`just generate-gpg`) additionally requires `gnupg` and `pwgen`.
 
 # Usage
 ```console

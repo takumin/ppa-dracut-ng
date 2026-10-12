@@ -1,0 +1,4 @@
+---
+packages:
+- name: aptly-dev/aptly@v1.6.3
+  tags: [repository]

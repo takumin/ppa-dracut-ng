@@ -19,6 +19,9 @@ architectures := "amd64 arm64"
 
 dists := "bookworm trixie noble resolute"
 
+aptly_origin := "takumi.tmfam.com"
+aptly_label := "Personal Package Archive for dracut-ng"
+
 # Build, generate and sign the apt repository
 all: package assets
 
@@ -79,59 +82,56 @@ package *targets: download (builder targets)
     done
 
 # Generate an unsigned apt repository into public/ (all platforms by default)
-repository *targets:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for dist in {{ if targets == "" { dists } else { targets } }}; do
-        mkdir -p "public/pool/${dist}/main" build/conf
-        for arch in {{ architectures }} all; do
-            mkdir -p "public/dists/${dist}/main/binary-${arch}"
-        done
-        mkdir -p "public/dists/${dist}/main/source"
-        cp "build/${dist}"/*.dsc "build/${dist}"/*.tar.* "build/${dist}"/*.deb "public/pool/${dist}/main/"
-        sed -e "s/@CODENAME@/${dist}/g" -e "s/@ARCHITECTURES@/{{ architectures }}/g" \
-            assets/repos.conf.in > "build/conf/${dist}-repos.conf"
-        sed -e "s/@CODENAME@/${dist}/g" -e "s/@ARCHITECTURES@/{{ architectures }}/g" \
-            assets/meta.conf.in > "build/conf/${dist}-meta.conf"
-        (cd public && apt-ftparchive generate "../build/conf/${dist}-repos.conf")
-        (cd public && apt-ftparchive -c "../build/conf/${dist}-meta.conf" release "dists/${dist}" > "dists/${dist}/Release")
-    done
+repository *targets: (_publish "false" targets)
 
 # Generate a signed apt repository into public/ (all platforms by default)
-reposign *targets: import-gpg (repository targets)
+reposign *targets: (_publish "true" targets)
+
+_publish sign *targets:
     #!/usr/bin/env bash
     set -euo pipefail
+    sign_opts=(-skip-signing)
+    if [ "{{ sign }}" = "true" ]; then
+        # The internal GPG provider of aptly only reads binary keyrings, so strip the ASCII armor.
+        mkdir -p -m 0700 build/keyring
+        dearmor() { sed -e '1,/^$/d' -e '/^=/,$d' "$1" | base64 -d > "$2"; }
+        dearmor assets/public.gpg.asc build/keyring/public.gpg
+        dearmor secret/secret.gpg.asc build/keyring/secret.gpg
+        sign_opts=(
+            -gpg-provider="internal"
+            -keyring="{{ justfile_directory() }}/build/keyring/public.gpg"
+            -secret-keyring="{{ justfile_directory() }}/build/keyring/secret.gpg"
+            -passphrase-file="{{ justfile_directory() }}/secret/passphrase"
+        )
+    fi
     for dist in {{ if targets == "" { dists } else { targets } }}; do
-        gpg --homedir secret/gpghome --batch \
-            --pinentry-mode loopback \
-            --passphrase "$(cat secret/passphrase)" \
-            --yes \
-            --clearsign \
-            -o "public/dists/${dist}/InRelease" \
-            "public/dists/${dist}/Release"
-        gpg --homedir secret/gpghome --batch \
-            --pinentry-mode loopback \
-            --passphrase "$(cat secret/passphrase)" \
-            --yes \
-            -abs \
-            -o "public/dists/${dist}/Release.gpg" \
-            "public/dists/${dist}/Release"
+        if [ ! -d "build/${dist}" ]; then
+            echo "no packages for distribution: ${dist}" >&2
+            exit 1
+        fi
+        conf="build/aptly/${dist}/aptly.conf"
+        rm -fr "build/aptly/${dist}" "public/dists/${dist}"
+        mkdir -p "build/aptly/${dist}" public
+        printf '{"rootDir":"%s","FileSystemPublishEndpoints":{"public":{"rootDir":"%s","linkMethod":"copy"}}}\n' \
+            "{{ justfile_directory() }}/build/aptly/${dist}" "{{ justfile_directory() }}/public" > "${conf}"
+        aptly -config="${conf}" repo create \
+            -distribution="${dist}" \
+            -component="main" \
+            "${dist}"
+        aptly -config="${conf}" repo add "${dist}" "build/${dist}"/*.dsc "build/${dist}"/*.deb
+        aptly -config="${conf}" publish repo \
+            -batch \
+            -architectures="{{ replace(architectures + " all source", " ", ",") }}" \
+            -origin="{{ aptly_origin }}" \
+            -label="{{ aptly_label }}" \
+            "${sign_opts[@]}" \
+            "${dist}" filesystem:public:.
     done
 
 # Generate and sign the apt repository with the web assets
 assets: reposign
     cp assets/index.html public/index.html
     cp assets/public.gpg.asc public/public.gpg.asc
-
-# Import the GPG signing key
-import-gpg:
-    mkdir -p -m 0700 secret/gpghome
-    gpg --homedir secret/gpghome --batch \
-        --pinentry-mode loopback \
-        --passphrase "$(cat secret/passphrase)" \
-        --import \
-        --allow-secret-key-import \
-        secret/secret.gpg.asc
 
 # Generate a new GPG signing key (requires gnupg and pwgen)
 generate-gpg:
@@ -165,7 +165,7 @@ generate-gpg:
 
 # Remove the build outputs
 clean:
-    rm -fr build public secret/gpghome
+    rm -fr build public
 
 # Remove the build outputs, the download cache and the builder images
 deepclean: clean
